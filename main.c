@@ -5,6 +5,15 @@
 #include <time.h>
 #include <math.h>
 
+/* REQUERIMIENTOS DEL JUEGO
+ * :) - Al menos 2 tipos diferentes de bricks (i.e uno que se rompe con un solo impacto, otro que requiere 2 impactos)
+- Al menos 3 niveles diferentes, que aumenten en complejidad y cambie la configuración y orden de los bricks.
+:) - El jugador tiene 3 vidas, si pierde todas : GAME_OVER
+- El jugador tiene 2 poderes que puede usar UNA vez en CUALQUIER momento
+                                       --- MultiBall, donde la bola se divide en 3 (alterandose su angulo de salida), es suficiente que el JUGADOR evite que al menos una de las bolas se pierda
+                                       ---- PowerBall, donde la bola destruye todos los BRICKS de un solo golpe y solo rebota contra las paredes - y hasta tocar el PALLET.
+ */
+
 #if defined(PLATFORM_WEB)
 #include <emscripten/emscripten.h>
 #endif
@@ -13,8 +22,8 @@
 // Some
 //----------------------------------------------------------------------------------
 #define PLAYER_MAX_LIFE         3
-#define LINES_OF_BRICKS         5
-#define BRICKS_PER_LINE        20
+#define LINES_OF_BRICKS         1
+#define BRICKS_PER_LINE         2
 //#define NIVEL                   3
 
 //----------------------------------------------------------------------------------
@@ -57,11 +66,13 @@ static Vector2 brickSize = { 0 };
 //------------------------------------------------------------------------------------
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
-int* InitGame(void);         // Initialize game
-static void UpdateGame(int* arrayPowers);       // Update game (one frame)
-static void DrawGame(void);         // Draw game (one frame)
+int* InitGame(int NIVEL);         // Initialize game
+static void UpdateGame(int* arrayPowers, int NIVEL); // Update game (one frame)
+int DrawGame(int NIVEL);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
-static void UpdateDrawFrame(int* arrayPowers);  // Update and Draw (one frame)
+
+
+static void UpdateDrawFrame(int* arrayPowers, int NIVEL);  // Update and Draw (one frame)
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -72,7 +83,9 @@ int main(void)
     //---------------------------------------------------------
     InitWindow(screenWidth, screenHeight, "classic game: arkanoid");
 
-    int *arrayPowers = InitGame();
+    int NIVEL = 1;
+    int *arrayPowers = InitGame(NIVEL);
+
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -85,7 +98,7 @@ int main(void)
     {
         // Update and Draw
         //----------------------------------------------------------------------------------
-        UpdateDrawFrame(arrayPowers);
+        UpdateDrawFrame(arrayPowers, NIVEL);
         //----------------------------------------------------------------------------------
     }
 #endif
@@ -104,7 +117,7 @@ int main(void)
 //------------------------------------------------------------------------------------
 
 // Initialize game variables
-int* InitGame(void)
+int* InitGame(int NIVEL)
 {
     brickSize = (Vector2){ GetScreenWidth()/BRICKS_PER_LINE, 40 };
 
@@ -122,15 +135,18 @@ int* InitGame(void)
     }
 */
     ball.position = (Vector2){ screenWidth/2, screenHeight*7/8 - 30 };
-    ball.speed = (Vector2){ 5, 5 };
-    ball.radius = 10;
+    //ball.speed = (Vector2){ 5, 5 };
+    //ball.radius = 10;
     ball.active = false;
 
 
     // Initialize Powers lrg
-    int *arrayPowers[] = {0};
+    int *arrayPowers = malloc(3*sizeof(int));
+    arrayPowers[0] = 1;
+    arrayPowers[1] = 1;
+    arrayPowers[2] = 1;
 
-    // Initialize bricks
+   // Initialize bricks
     int initialDownPosition = 50;
 
     for (int i = 0; i < LINES_OF_BRICKS; i++)
@@ -141,18 +157,46 @@ int* InitGame(void)
             brick[i][j].position = (Vector2){ j*brickSize.x + brickSize.x/2, i*brickSize.y + initialDownPosition };
             brick[i][j].active = true;
 
+            // 2 diferent bricks lrg
+            if ((i + j) % 2 == 0) // bricks oscuros mas resistentes
+                    brick[i][j].numHits = 1;
+            else //bricks de color claro mas vulnerables
+                brick[i][j].numHits = 2;
+
+            switch(NIVEL)
+            {
+                case 1:
+                    ball.speed = (Vector2){ 5, 5 };
+                    ball.radius = 10;
+                    break;
+                case 2:
+                    ball.speed = (Vector2){ -1000,-1000  };
+                    ball.radius = 40;
+                    break;
+
+                case 3:
+                    ball.radius = 100;
+                    if (j % 2 == 0)
+                        brick[i][j].numHits = rand() % 2;
+                    else
+                        brick[i][j].numHits = rand() % 2 ;
+
+            }
+        }
+            /*
             // nivel 2 lrg
-            if (j % 2 == 0)
+             if (j % 2 == 0)
                 brick[i][j].numHits = rand() % 2;
             else
                 brick[i][j].numHits = rand() % 2 ;
-        }
+                }
+                */
     }
-    return *arrayPowers; //lrg
+    return arrayPowers; //lrg
 }
 
 // Update game (one frame)
-void UpdateGame(int* arrayPowers)
+void UpdateGame(int* arrayPowers, int NIVEL)
 {
     if (!gameOver)
     {
@@ -162,10 +206,13 @@ void UpdateGame(int* arrayPowers)
         {
             // SprPoder PowerBall - Se activa con la Ss lrg
             float Num = -1;
-            if (IsKeyDown('S') == 1){ //&& arrayPowers[0] == 0){
+            if (IsKeyDown('S') == 1 && arrayPowers[0] == 1)
                 Num = 1;
-                //arrayPowers[0] ++; // esta mal se debe de considerar que esta dentro de un ciclo lrg
+            if (IsKeyReleased('S') == 1) {
+                printf("REALEASED");
+                arrayPowers[0] = 0;
             }
+            
             // Player movement logics
             if (IsKeyDown(KEY_LEFT)) player.position.x -= 5;
             if ((player.position.x - player.size.x/2) <= 0) player.position.x = player.size.x/2;
@@ -286,14 +333,14 @@ void UpdateGame(int* arrayPowers)
     {
         if (IsKeyPressed(KEY_ENTER))
         {
-            InitGame();
+            InitGame(NIVEL);
             gameOver = false;
         }
     }
 }
 
 // Draw game (one frame)
-void DrawGame(void)
+int DrawGame(int NIVEL)
 {
     BeginDrawing();
 
@@ -325,9 +372,16 @@ void DrawGame(void)
 
         if (pause) DrawText("GAME PAUSED", screenWidth/2 - MeasureText("GAME PAUSED", 40)/2, screenHeight/2 - 40, 40, PINK);
     }
-    else DrawText("PRESS [ENTER] TO PLAY AGAIN", GetScreenWidth()/2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20)/2, GetScreenHeight()/2 - 50, 20, PINK);
+    else {
+        DrawText("PRESS [ENTER] TO NEXT LEVEL",
+                 GetScreenWidth() / 2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20) / 2, GetScreenHeight() / 2 - 50,
+                 20, PINK);
+        NIVEL ++;
+
+    }
 
     EndDrawing();
+    return NIVEL;
 }
 
 // Unload game variables
@@ -337,8 +391,8 @@ void UnloadGame(void)
 }
 
 // Update and Draw (one frame)
-void UpdateDrawFrame(int* arrayPowers)
+void UpdateDrawFrame(int* arrayPowers, int NIVEL)
 {
-    UpdateGame(arrayPowers);
-    DrawGame();
+    UpdateGame(arrayPowers, NIVEL);
+    DrawGame(NIVEL);
 }
