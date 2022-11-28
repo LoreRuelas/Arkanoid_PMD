@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <ctype.h>
 
 /* REQUERIMIENTOS DEL JUEGO
  * :) - Al menos 2 tipos diferentes de bricks (i.e uno que se rompe con un solo impacto, otro que requiere 2 impactos)
@@ -80,7 +81,7 @@ int main(void)
 {
     // Initialization (Note windowTitle is unused on Android)
     //---------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "classic game: arkanoid");
+    InitWindow(screenWidth, screenHeight, "classic game: PROYECTO FINAL");
 
     int NIVEL = 1;
     int *arrayPowers = InitGame(NIVEL);
@@ -126,8 +127,8 @@ int* InitGame(int NIVEL)
     player.life = PLAYER_MAX_LIFE;
 
     ball.position = (Vector2){ screenWidth/2, screenHeight*7/8 - 30 };
-    ball.speed = (Vector2){ 5, 5 };
-    //ball.radius = 10;
+    ball.speed = (Vector2){ 10, 10 };
+    ball.radius = 10;
     ball.active = false;
 
     // Se inicializan balls para el poder MultiBall
@@ -148,7 +149,7 @@ int* InitGame(int NIVEL)
     arrayPowers[1] = 1;
     arrayPowers[2] = 1;
 
-   // Initialize bricks
+    // Initialize bricks
     int initialDownPosition = 50;
 
     for (int i = 0; i < LINES_OF_BRICKS; i++)
@@ -161,7 +162,7 @@ int* InitGame(int NIVEL)
 
             // 2 diferent bricks lrg
             if ((i + j) % 2 == 0) // bricks oscuros mas resistentes
-                    brick[i][j].numHits = 1;
+                brick[i][j].numHits = 1;
             else //bricks de color claro mas vulnerables
                 brick[i][j].numHits = 2;
             //printf("Check Nivel = " + NIVEL);
@@ -170,30 +171,29 @@ int* InitGame(int NIVEL)
             {
                 case 1:
                     //ball.speed = (Vector2){ 5, 5 };
-                    ball.radius = 5;
                     break;
                 case 2:
-                    //ball.speed = (Vector2){ -1000,-1000  };
-                    ball.radius = 10;
+                    // Se modifica el "mundo de bricks"
+                    brick[i][j].numHits = rand() % 2;
                     break;
 
                 case 3:
-                    ball.radius = 25;
-
-                    // Se modifica el "mundo de bricks"
-                    brick[i][j].numHits = rand() % 2;
+                    if ((i + j) % 2 == 0) // bricks oscuros mas resistentes
+                        brick[i][j].numHits = 2;
+                    else //bricks de color claro mas vulnerables
+                        brick[i][j].numHits = 3;
 
 
             }
         }
-            /*
-            // nivel 2 lrg
-             if (j % 2 == 0)
-                brick[i][j].numHits = rand() % 2;
-            else
-                brick[i][j].numHits = rand() % 2 ;
-                }
-                */
+        /*
+        // nivel 2 lrg
+         if (j % 2 == 0)
+            brick[i][j].numHits = rand() % 2;
+        else
+            brick[i][j].numHits = rand() % 2 ;
+            }
+            */
     }
     return arrayPowers; //lrg
 }
@@ -214,10 +214,9 @@ int UpdateGame2CANBEDELETED(int* arrayPowers, int NIVEL, int numBall)
             if (IsKeyDown('S') == 1 && arrayPowers[0] == 1)
                 Num = 1;
             if (IsKeyReleased('S') == 1) {
-                //printf("REALEASED");
                 arrayPowers[0] = 0;
             }
-            
+
             // Player movement logics
             if (IsKeyDown(KEY_LEFT)) player.position.x -= 5;
             if ((player.position.x - player.size.x/2) <= 0) player.position.x = player.size.x/2;
@@ -402,9 +401,9 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
             {
                 // se modifica la posicion inicial de las pelotas lrg
                 if ( numBall == 2 ) {
-                    ballptr->position = (Vector2){ player.position.x + 20 , screenHeight*7/8 - 30 };
+                    ballptr->position = (Vector2){ player.position.x + 20 , screenHeight*7/8 - 20 };
                 } else if ( numBall == 3 ) {
-                    ballptr->position = (Vector2){ player.position.x - 10 , screenHeight*7/8 - 30 };
+                    ballptr->position = (Vector2){ player.position.x - 10 , screenHeight*7/8 - 20 };
                 } else {
                     ballptr->position = (Vector2){ player.position.x, screenHeight*7/8 - 30 };
                 }
@@ -423,7 +422,9 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
                     ballptr->active = false;
                     player.life--;
                 } else {
-                    ballptr->speed.y *= -1;
+                    //ballptr->speed.y *= -1;
+                    ballptr->active = false;
+                    ballptr->radius = 0;
 
                 }
 
@@ -533,10 +534,10 @@ void DrawGame(int *arrayPowers)
         DrawRectangle(player.position.x - player.size.x/2, player.position.y - player.size.y/2, player.size.x, player.size.y, BLACK);
 
         // Draw player lives
-        for (int i = 0; i < player.life; i++) DrawRectangle(20 + 40*i, screenHeight - 30, 35, 10, DARKPURPLE);
+        for (int i = 0; i < player.life; i++) DrawRectangle(20 + 40*i, screenHeight - 30, 35, 10, PURPLE);
 
         // Draw ball
-        DrawCircleV(ball.position, ball.radius, MAROON);
+        DrawCircleV(ball.position, ball.radius, PURPLE);
 
         // lrg se dibujan balls para el MultiBall // se dejan de dibujar si ya está inactivo el poder
         if (arrayPowers[1] == 1)
@@ -554,7 +555,7 @@ void DrawGame(int *arrayPowers)
                 if (brick[i][j].active)
                 {
                     if ((i + j) % 2 == 0) DrawRectangle(brick[i][j].position.x - brickSize.x/2, brick[i][j].position.y - brickSize.y/2, brickSize.x, brickSize.y, PINK);
-                    else DrawRectangle(brick[i][j].position.x - brickSize.x/2, brick[i][j].position.y - brickSize.y/2, brickSize.x, brickSize.y, DARKPURPLE);
+                    else DrawRectangle(brick[i][j].position.x - brickSize.x/2, brick[i][j].position.y - brickSize.y/2, brickSize.x, brickSize.y, PURPLE);
                 }
             }
         }
