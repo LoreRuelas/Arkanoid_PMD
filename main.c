@@ -22,9 +22,8 @@
 // Some
 //----------------------------------------------------------------------------------
 #define PLAYER_MAX_LIFE         3
-#define LINES_OF_BRICKS         1
+#define LINES_OF_BRICKS         2
 #define BRICKS_PER_LINE         2
-//#define NIVEL                   3
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -67,12 +66,10 @@ static Vector2 brickSize = { 0 };
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
 int* InitGame(int NIVEL);         // Initialize game
-static void UpdateGame(int* arrayPowers, int NIVEL); // Update game (one frame)
-int DrawGame(int NIVEL);         // Draw game (one frame)
+int UpdateGame(int* arrayPowers, int NIVEL); // Update game (one frame)
+static void DrawGame(void);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
-
-
-static void UpdateDrawFrame(int* arrayPowers, int NIVEL);  // Update and Draw (one frame)
+int UpdateDrawFrame(int* arrayPowers, int NIVEL);  // Update and Draw (one frame)
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -98,7 +95,7 @@ int main(void)
     {
         // Update and Draw
         //----------------------------------------------------------------------------------
-        UpdateDrawFrame(arrayPowers, NIVEL);
+        NIVEL = UpdateDrawFrame(arrayPowers, NIVEL);
         //----------------------------------------------------------------------------------
     }
 #endif
@@ -125,17 +122,17 @@ int* InitGame(int NIVEL)
     player.position = (Vector2){ screenWidth/2, screenHeight*7/8 };
     player.size = (Vector2){ screenWidth/10, 20 };
     player.life = PLAYER_MAX_LIFE;
-/*
+
      Ball ball2;
-   if (IsKeyDown('A') == 1) { //&& arrayPowers[0] == 0){
-        ball2.position = (Vector2){ screenWidth/2, screenHeight*7/8 - 30 };
-        ball2.speed = (Vector2){ 10, 10 };
-        ball2.radius = 10;
-        ball2.active = true;
-    }
-*/
+
+     // lrg ball2
+     ball2.position = (Vector2){ screenWidth/2, screenHeight*7/8 - 30 };
+     ball2.speed = (Vector2){ 10, 10 };
+     ball2.radius = 10;
+     ball2.active = false;
+
     ball.position = (Vector2){ screenWidth/2, screenHeight*7/8 - 30 };
-    //ball.speed = (Vector2){ 5, 5 };
+    ball.speed = (Vector2){ 5, 5 };
     //ball.radius = 10;
     ball.active = false;
 
@@ -162,24 +159,25 @@ int* InitGame(int NIVEL)
                     brick[i][j].numHits = 1;
             else //bricks de color claro mas vulnerables
                 brick[i][j].numHits = 2;
+            //printf("Check Nivel = " + NIVEL);
 
             switch(NIVEL)
             {
                 case 1:
-                    ball.speed = (Vector2){ 5, 5 };
-                    ball.radius = 10;
+                    //ball.speed = (Vector2){ 5, 5 };
+                    ball.radius = 5;
                     break;
                 case 2:
-                    ball.speed = (Vector2){ -1000,-1000  };
-                    ball.radius = 40;
+                    //ball.speed = (Vector2){ -1000,-1000  };
+                    ball.radius = 10;
                     break;
 
                 case 3:
-                    ball.radius = 100;
-                    if (j % 2 == 0)
-                        brick[i][j].numHits = rand() % 2;
-                    else
-                        brick[i][j].numHits = rand() % 2 ;
+                    ball.radius = 25;
+
+                    // Se modifica el "mundo de bricks"
+                    brick[i][j].numHits = rand() % 2;
+
 
             }
         }
@@ -196,7 +194,7 @@ int* InitGame(int NIVEL)
 }
 
 // Update game (one frame)
-void UpdateGame(int* arrayPowers, int NIVEL)
+int UpdateGame(int* arrayPowers, int NIVEL)
 {
     if (!gameOver)
     {
@@ -209,7 +207,7 @@ void UpdateGame(int* arrayPowers, int NIVEL)
             if (IsKeyDown('S') == 1 && arrayPowers[0] == 1)
                 Num = 1;
             if (IsKeyReleased('S') == 1) {
-                printf("REALEASED");
+                //printf("REALEASED");
                 arrayPowers[0] = 0;
             }
             
@@ -333,14 +331,19 @@ void UpdateGame(int* arrayPowers, int NIVEL)
     {
         if (IsKeyPressed(KEY_ENTER))
         {
+            //printf("Key is pressed");
+
+            // Se aumenta el nivel
+            NIVEL++;
             InitGame(NIVEL);
             gameOver = false;
         }
     }
+    return NIVEL;
 }
 
 // Draw game (one frame)
-int DrawGame(int NIVEL)
+void DrawGame(void)
 {
     BeginDrawing();
 
@@ -376,12 +379,11 @@ int DrawGame(int NIVEL)
         DrawText("PRESS [ENTER] TO NEXT LEVEL",
                  GetScreenWidth() / 2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20) / 2, GetScreenHeight() / 2 - 50,
                  20, PINK);
-        NIVEL ++;
+        printf("NIVEL INCREMENTED");
 
     }
 
     EndDrawing();
-    return NIVEL;
 }
 
 // Unload game variables
@@ -391,8 +393,10 @@ void UnloadGame(void)
 }
 
 // Update and Draw (one frame)
-void UpdateDrawFrame(int* arrayPowers, int NIVEL)
+int UpdateDrawFrame(int* arrayPowers, int NIVEL)
 {
-    UpdateGame(arrayPowers, NIVEL);
-    DrawGame(NIVEL);
+    NIVEL = UpdateGame(arrayPowers, NIVEL);
+    DrawGame();
+    return NIVEL;
+
 }
