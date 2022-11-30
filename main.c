@@ -70,7 +70,7 @@ static Vector2 brickSize = { 0 };
 //------------------------------------------------------------------------------------
 int* InitGame(int NIVEL);         // Initialize game
 int UpdateGame(int* arrayPowers, int NIVEL,  int numBall); // Update game (one frame)
-static void DrawGame(int *arrayPowers);         // Draw game (one frame)
+static void DrawGame(int *arrayPowers, int NIVEL);         // Draw game (one frame)
 static void UnloadGame(void);       // Unload game
 int UpdateDrawFrame(int* arrayPowers, int NIVEL);  // Update and Draw (one frame)
 
@@ -147,7 +147,7 @@ int* InitGame(int NIVEL)
     int *arrayPowers = malloc(3*sizeof(int));
     arrayPowers[0] = 1;
     arrayPowers[1] = 1;
-    arrayPowers[2] = 1;
+    // arrayPowers[2] = 1;
 
     // Initialize bricks
     int initialDownPosition = 50;
@@ -170,7 +170,6 @@ int* InitGame(int NIVEL)
             switch(NIVEL)
             {
                 case 1:
-                    //ball.speed = (Vector2){ 5, 5 };
                     break;
                 case 2:
                     // Se modifica el "mundo de bricks"
@@ -182,18 +181,11 @@ int* InitGame(int NIVEL)
                         brick[i][j].numHits = 2;
                     else //bricks de color claro mas vulnerables
                         brick[i][j].numHits = 3;
-
+                default:
+                    player.size = (Vector2){ screenWidth/14, 20 };
 
             }
         }
-        /*
-        // nivel 2 lrg
-         if (j % 2 == 0)
-            brick[i][j].numHits = rand() % 2;
-        else
-            brick[i][j].numHits = rand() % 2 ;
-            }
-            */
     }
     return arrayPowers; //lrg
 }
@@ -522,7 +514,7 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
 
 
 // Draw game (one frame)
-void DrawGame(int *arrayPowers)
+void DrawGame(int *arrayPowers, int NIVEL)
 {
     BeginDrawing();
 
@@ -570,6 +562,7 @@ void DrawGame(int *arrayPowers)
 
     }
 
+    DrawText(TextFormat("NIVEL: %i", NIVEL), 10, 10, 20, DARKPURPLE);
     EndDrawing();
 }
 
@@ -592,7 +585,6 @@ int UpdateDrawFrame(int* arrayPowers, int NIVEL)
         arrayPowers[1] = 0;
     }
 
-    DrawGame(arrayPowers);
+    DrawGame(arrayPowers, NIVEL);
     return NIVEL;
-
 }
