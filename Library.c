@@ -9,8 +9,8 @@
 // Some
 //----------------------------------------------------------------------------------
 #define PLAYER_MAX_LIFE         3
-#define LINES_OF_BRICKS         5
-#define BRICKS_PER_LINE         20
+#define LINES_OF_BRICKS         2
+#define BRICKS_PER_LINE         2
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -45,6 +45,7 @@ static Player player = { 0 };
 static Ball ball = { 0 };
 static Ball ball2 = { 0 };
 static Ball ball3 = { 0 };
+float Num = -1; // Se usa para activar el PowerBall
 
 static Brick brick[LINES_OF_BRICKS][BRICKS_PER_LINE] = { 0 };
 static Vector2 brickSize = { 0 };
@@ -129,6 +130,7 @@ int* InitGame(int NIVEL)
 }
 
 
+
 // Update game (one frame)
 int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
 {
@@ -146,13 +148,17 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
         if (!pause)
         {
             // SprPoder PowerBall - Se activa con la Ss lrg
-            float Num = -1;
-            if (IsKeyDown('S') == 1 && arrayPowers[0] == 1)
+
+            if (IsKeyPressed('S') == 1 && arrayPowers[0] == 1) {
                 Num = 1;
+                printf("HOLAA S");
+            }
+            /*
             if (IsKeyReleased('S') == 1) {
                 //printf("REALEASED");
                 arrayPowers[0] = 0;
             }
+             */
 
             // Player movement logics
             if (IsKeyDown(KEY_LEFT)) player.position.x -= 5;
@@ -217,6 +223,12 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
                 {
                     ballptr->speed.y *= -1;
                     ballptr->speed.x = (ballptr->position.x - player.position.x)/(player.size.x/2)*5;
+                }
+                if (Num == 1) // Checa si PowerBall está activo
+                {
+                    // Se desactiva el poder /  Num vuelve a su valor original
+                    Num = -1;
+                    arrayPowers[0] = 0;
                 }
             }
 
@@ -292,6 +304,7 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
         if (IsKeyPressed(KEY_ENTER))
         {
             NIVEL++;
+            Num = -1;
             InitGame(NIVEL);
             gameOver = false;
         }
