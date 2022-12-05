@@ -153,13 +153,14 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
             if (IsKeyPressed('S') == 1 && arrayPowers[0] == 1) {
                 Num = 1;
                 //printf("HOLAA S");
+                for (int i = 0; i < LINES_OF_BRICKS; i++)
+                {
+                    for (int j = 0; j < LINES_OF_BRICKS; j++)
+                    {
+                        brick[i][j].numHits = 1;
+                    }
+                }
             }
-            /*
-            if (IsKeyReleased('S') == 1) {
-                //printf("REALEASED");
-                arrayPowers[0] = 0;
-            }
-             */
 
             // Player movement logics
             if (IsKeyDown(KEY_LEFT)) player.position.x -= 5;
@@ -232,6 +233,16 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
                     // Se desactiva el poder /  Num vuelve a su valor original
                     Num = -1;
                     arrayPowers[0] = 0;
+                    for (int i = 0; i < LINES_OF_BRICKS; i++)
+                    {
+                        for (int j = 0; j < LINES_OF_BRICKS; j++)
+                        {
+                            if ((i + j) % 2 == 0) // bricks oscuros mas resistentes
+                                brick[i][j].numHits = 1;
+                            else //bricks de color claro mas vulnerables
+                                brick[i][j].numHits = 2;
+                        }
+                    }
                 }
             }
 
