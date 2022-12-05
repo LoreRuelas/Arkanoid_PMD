@@ -9,8 +9,8 @@
 // Some
 //----------------------------------------------------------------------------------
 #define PLAYER_MAX_LIFE         3
-#define LINES_OF_BRICKS         2
-#define BRICKS_PER_LINE         2
+#define LINES_OF_BRICKS         6
+#define BRICKS_PER_LINE         6
 
 //----------------------------------------------------------------------------------
 // Types and Structures Definition
@@ -46,6 +46,7 @@ static Ball ball = { 0 };
 static Ball ball2 = { 0 };
 static Ball ball3 = { 0 };
 float Num = -1; // Se usa para activar el PowerBall
+int  BanderaMultiBall = 1;
 
 static Brick brick[LINES_OF_BRICKS][BRICKS_PER_LINE] = { 0 };
 static Vector2 brickSize = { 0 };
@@ -151,7 +152,7 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
 
             if (IsKeyPressed('S') == 1 && arrayPowers[0] == 1) {
                 Num = 1;
-                printf("HOLAA S");
+                //printf("HOLAA S");
             }
             /*
             if (IsKeyReleased('S') == 1) {
@@ -210,6 +211,8 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
                     //ballptr->speed.y *= -1;
                     ballptr->active = false;
                     ballptr->radius = 0;
+                    BanderaMultiBall = 1;
+                    arrayPowers[1] = 0;
 
                 }
 
@@ -305,6 +308,7 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
         {
             NIVEL++;
             Num = -1;
+            BanderaMultiBall = 1;
             InitGame(NIVEL);
             gameOver = false;
         }
@@ -370,14 +374,16 @@ void DrawGame(int *arrayPowers, int NIVEL)
 int UpdateDrawFrame(int* arrayPowers, int NIVEL)
 {
     NIVEL = UpdateGame(arrayPowers, NIVEL, 1 );
-    if (IsKeyDown('A') == 1 && arrayPowers[1] == 1) {
+
+    if (IsKeyPressed('A') &&  BanderaMultiBall == 1)
+    {
+        BanderaMultiBall = 0;
+    }
+    if ( BanderaMultiBall == 0 && arrayPowers[1] == 1 ) {
         UpdateGame(arrayPowers, NIVEL, 2);
         UpdateGame(arrayPowers, NIVEL, 3);
     }
-    if (IsKeyReleased('A') == 1) {
-        //printf("REALEASED");
-        arrayPowers[1] = 0;
-    }
+
 
     DrawGame(arrayPowers, NIVEL);
     return NIVEL;
