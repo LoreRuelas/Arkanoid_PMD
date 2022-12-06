@@ -2,7 +2,7 @@ ReadMe
 
 Sobre la implementación:
  - Este Juego se implementó en el lenguaje de C99, en el IDE Clion.
- - El juego necesita de la librería de Raylib, la cual está incluida en el CMake.
+ - Usamos la librería de Raylib, la cual ya está incluida en el CMake.
 
 Para jugar al juego de BrickBreaker, con correr el programa se abrirá una ventana y podrás comenzar a jugar.
   - Tienes 3 vidas por nivel
