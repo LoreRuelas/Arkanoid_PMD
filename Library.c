@@ -117,7 +117,7 @@ int* InitGame(int NIVEL)
                         brick[i][j].numHits = 2; // 2 hits
                     else //bricks de color claro mas vulnerables
                         brick[i][j].numHits = 3; // 3 hits
-                default:
+                default: // Nivel 4 en adelante La dificultad se aumento reduciendo la longitus del jugador (barra negra)
                     player.size = (Vector2){ screenWidth/14, 20 };
 
             }
