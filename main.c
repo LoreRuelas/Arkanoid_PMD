@@ -1,14 +1,13 @@
 #include "Library.h."
 
-//------------------------------------------------------------------------------------
-// Program main entry point
+
 //------------------------------------------------------------------------------------
 int main(void)
 {
-    // Initialization (Note windowTitle is unused on Android)
-    //---------------------------------------------------------
+    // Se inicia la ventana
     InitWindow(screenWidth, screenHeight, "classic game: PROYECTO FINAL");
 
+    // Se inician variables
     int NIVEL = 1;
     int *arrayPowers = InitGame(NIVEL);
 
@@ -19,19 +18,17 @@ int main(void)
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
-    // Main game loop
+    // El loop principal
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        // Update and Draw
-        //----------------------------------------------------------------------------------
+        // Se actualiza el juego - se van cargando los diferntes "estados" del juego
         NIVEL = UpdateDrawFrame(arrayPowers, NIVEL);
         //----------------------------------------------------------------------------------
     }
 #endif
-    // De-Initialization
     //--------------------------------------------------------------------------------------
 
-    CloseWindow();        // Close window and OpenGL context
+    CloseWindow();        // Se cierra la ventana
     //--------------------------------------------------------------------------------------
 
     return 0;
