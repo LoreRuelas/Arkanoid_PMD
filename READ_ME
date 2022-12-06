@@ -1,4 +1,26 @@
+ReadMe
+
+Sobre la implementación:
+ - Este Juego se implementó en el lenguaje de C99, en el IDE Clion.
+ - El juego necesita de la librería de Raylib, la cual está incluida en el CMake.
+
+Para jugar al juego de BrickBreaker, con correr el programa se abrirá una ventana y podrás comenzar a jugar.
+  - Tienes 3 vidas por nivel
+  - La dificultad de los niveles aumenta conforme vas subiendo
+  - A partir del nivel 4, el nivel será el mismo, y dependerá de ti ver hasta dónde puedas llegar
+
+Cuentas con dos superpoderes que te ayudarán a pasar de nivel más rápido:
+  - SuperBall: tu pelota romperá todos los bloques por los que pase hasta que regrese a la plataforma. Actívalo pulsando la tecla ‘S’ de tu teclado.
+  - MultiBall: tendrás tres pelotas para romper la mayor cantidad de bloques que puedas. No te preocupes en observar cuál era la pelota original. 
+    Si pierdes dos, entonces puedes volver a tirar.
+
+Puedes pausar el juego cuando lo veas necesario con la letra ‘P’, y se reanudará cuando oprimas ‘ENTER’
+¡Buena Suerte!
+
+
+USO DE TECLAS
+
 ENTER - Para empezar a jugar
 ESPACIO - Para que la pelotita empiece a botar
-S - Activar el poder de PowerBall (Dejar presionado)
-A - Activar el poder de MultiBall (Dejar presionado) (Con el ESPACIO empiezan a brincar)
+S - Activar el poder de PowerBall
+A - Activar el poder de MultiBall (Con el ESPACIO empiezan a brincar)
