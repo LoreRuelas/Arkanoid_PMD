@@ -356,9 +356,12 @@ void DrawGame(int *arrayPowers, int NIVEL)
             {
                 if (brick[i][j].active)
                 {
-                    if ((i + j) % 2 == 0) DrawRectangle(brick[i][j].position.x - brickSize.x/2, brick[i][j].position.y - brickSize.y/2, brickSize.x, brickSize.y, PINK);
-                    else DrawRectangle(brick[i][j].position.x - brickSize.x/2, brick[i][j].position.y - brickSize.y/2, brickSize.x, brickSize.y, PURPLE);
+                    if ((i + j) % 2 == 0 || brick[i][j].numHits == 1) // si es brick de solo un hit o le queda solo un hit será brick PINK
+                        DrawRectangle(brick[i][j].position.x - brickSize.x/2, brick[i][j].position.y - brickSize.y/2, brickSize.x, brickSize.y, PINK);
+                    else
+                        DrawRectangle(brick[i][j].position.x - brickSize.x/2, brick[i][j].position.y - brickSize.y/2, brickSize.x, brickSize.y, PURPLE);
                 }
+
             }
         }
 
