@@ -6,16 +6,16 @@
 #endif
 
 //----------------------------------------------------------------------------------
-// Some
+// Se definen constantes
 //----------------------------------------------------------------------------------
 #define PLAYER_MAX_LIFE         3
 #define LINES_OF_BRICKS         6
 #define BRICKS_PER_LINE         6
 
 //----------------------------------------------------------------------------------
-// Types and Structures Definition
+// Se definen los structs
 //----------------------------------------------------------------------------------
-typedef struct Player {
+typedef struct Player { // barra negra que controla el jugador
     Vector2 position;
     Vector2 size;
     int life;
@@ -36,7 +36,7 @@ typedef struct Brick {
 
 
 //------------------------------------------------------------------------------------
-// Global Variables Declaration
+// Se definen variables globales
 //------------------------------------------------------------------------------------
 static bool gameOver = false;
 static bool pause = false;
@@ -45,23 +45,21 @@ static Player player = { 0 };
 static Ball ball = { 0 };
 static Ball ball2 = { 0 };
 static Ball ball3 = { 0 };
-float Num = -1; // Se usa para activar el PowerBall
-int  BanderaMultiBall = 1;
+float Num = -1; // Se usa para activar el PowerBall (En un inicio desactivado)
+int  BanderaMultiBall = 1; // Se usa para activar el poder MultiBall
 
 static Brick brick[LINES_OF_BRICKS][BRICKS_PER_LINE] = { 0 };
 static Vector2 brickSize = { 0 };
 
 
 //------------------------------------------------------------------------------------
-// Module Functions Definitions (local)
-//------------------------------------------------------------------------------------
 
-// Initialize game variables
+// Se inicilizan variables (Carcateristicas de los bricks/player/ball)
 int* InitGame(int NIVEL)
 {
     brickSize = (Vector2){ GetScreenWidth()/BRICKS_PER_LINE, 40 };
 
-    // Initialize player
+    // Se inicializa el jugador
     player.position = (Vector2){ screenWidth/2, screenHeight*7/8 };
     player.size = (Vector2){ screenWidth/10, 20 };
     player.life = PLAYER_MAX_LIFE;
@@ -83,13 +81,13 @@ int* InitGame(int NIVEL)
     ball3.active = false;
 
 
-    // Initialize Powers lrg
+    // Se inicializa array que "controla" los poderes
     int *arrayPowers = malloc(3*sizeof(int));
-    arrayPowers[0] = 1;
-    arrayPowers[1] = 1;
+    arrayPowers[0] = 1; // PoderBall
+    arrayPowers[1] = 1; // MultiBall
     // arrayPowers[2] = 1;
 
-    // Initialize bricks
+    // Se inicializan los bricks
     int initialDownPosition = 50;
 
     for (int i = 0; i < LINES_OF_BRICKS; i++)
@@ -101,26 +99,24 @@ int* InitGame(int NIVEL)
             brick[i][j].active = true;
 
             // 2 diferent bricks lrg
-            if ((i + j) % 2 == 0) // bricks oscuros mas resistentes
+            if ((i + j) % 2 == 0) // bricks de color claro mas vulnerables 1 hit
                 brick[i][j].numHits = 1;
-            else //bricks de color claro mas vulnerables
+            else // bricks oscuros mas resistentes 2 hits
                 brick[i][j].numHits = 2;
-            //printf("Check Nivel = " + NIVEL);
 
             switch(NIVEL)
             {
-                case 1:
+                case 1: // Nivel 1 Es el basico y común
                     break;
-                case 2:
-                    // Se modifica el "mundo de bricks"
+                case 2: // Nivel 2 Se modifica el "mundo de bricks"
                     brick[i][j].numHits = rand() % 2;
                     break;
 
-                case 3:
+                case 3: // Nivel 3 Unos bricks mucho más resistentes (3 hits) y otros (2 hits)
                     if ((i + j) % 2 == 0) // bricks oscuros mas resistentes
-                        brick[i][j].numHits = 2;
+                        brick[i][j].numHits = 2; // 2 hits
                     else //bricks de color claro mas vulnerables
-                        brick[i][j].numHits = 3;
+                        brick[i][j].numHits = 3; // 3 hits
                 default:
                     player.size = (Vector2){ screenWidth/14, 20 };
 
@@ -130,11 +126,10 @@ int* InitGame(int NIVEL)
     return arrayPowers; //lrg
 }
 
-
-
-// Update game (one frame)
+// Controla la "imagen" que se muestra al ususario / Se actualiza el juego
 int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
 {
+    // Se escoge el ball a usar, dependiendo a "numBall"
     Ball * ballptr = &ball;
     if ( numBall == 2 ) {
         ballptr = &ball2;
@@ -151,8 +146,8 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
             // SprPoder PowerBall - Se activa con la Ss lrg
 
             if (IsKeyPressed('S') == 1 && arrayPowers[0] == 1) {
-                Num = 1;
-                //printf("HOLAA S");
+                Num = 1; // Variable clave para que funcione PowerBall
+                // Se cambia la resistencia de los bricks a 1 hit
                 for (int i = 0; i < LINES_OF_BRICKS; i++)
                 {
                     for (int j = 0; j < LINES_OF_BRICKS; j++)
@@ -162,13 +157,13 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
                 }
             }
 
-            // Player movement logics
+            // Control del movimiento del jugador
             if (IsKeyDown(KEY_LEFT)) player.position.x -= 5;
             if ((player.position.x - player.size.x/2) <= 0) player.position.x = player.size.x/2;
             if (IsKeyDown(KEY_RIGHT)) player.position.x += 5;
             if ((player.position.x + player.size.x/2) >= screenWidth) player.position.x = screenWidth - player.size.x/2;
 
-            // Ball launching logic
+            // Se inicia la pelota/  Se suelta hacia el jugador (plataforma negra)
             if (!ballptr->active)
             {
                 if (IsKeyPressed(KEY_SPACE))
@@ -178,7 +173,7 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
                 }
             }
 
-            // Ball movement logic
+            // Control del movimiento de la pelota
             if (ballptr->active)
             {
                 ballptr->position.x += ballptr->speed.x;
@@ -186,7 +181,7 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
             }
             else
             {
-                // se modifica la posicion inicial de las pelotas lrg
+                // se modifica la posicion inicial de las pelotas (Considerando las del MultiBall)
                 if ( numBall == 2 ) {
                     ballptr->position = (Vector2){ player.position.x + 20 , screenHeight*7/8 - 20 };
                 } else if ( numBall == 3 ) {
@@ -197,7 +192,7 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
 
             }
 
-            // Collision logic: ball vs walls
+            // Colisión de la ball contra las "paredes"
             if (((ballptr->position.x + ballptr->radius) >= screenWidth) || ((ballptr->position.x - ballptr->radius) <= 0))
                 ballptr->speed.x *= -1;
             if ((ballptr->position.y - ballptr->radius) <= 0)
@@ -209,7 +204,6 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
                     ballptr->active = false;
                     player.life--;
                 } else {
-                    //ballptr->speed.y *= -1;
                     ballptr->active = false;
                     ballptr->radius = 0;
                     BanderaMultiBall = 1;
@@ -219,7 +213,7 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
 
             }
 
-            // Collision logic: ball vs player
+            // Colisión de ball contra el jugador(barra negra)
             if (CheckCollisionCircleRec(ballptr->position, ballptr->radius,
                                         (Rectangle){ player.position.x - player.size.x/2, player.position.y - player.size.y/2, player.size.x, player.size.y}))
             {
@@ -233,13 +227,14 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
                     // Se desactiva el poder /  Num vuelve a su valor original
                     Num = -1;
                     arrayPowers[0] = 0;
+                    // Los hits de los bricks vuelven a su normalidad
                     for (int i = 0; i < LINES_OF_BRICKS; i++)
                     {
                         for (int j = 0; j < LINES_OF_BRICKS; j++)
                         {
-                            if ((i + j) % 2 == 0) // bricks oscuros mas resistentes
+                            if ((i + j) % 2 == 0) // bricks de color claro mas vulnerables
                                 brick[i][j].numHits = 1;
-                            else //bricks de color claro mas vulnerables
+                            else // bricks oscuros mas resistentes
                                 brick[i][j].numHits = 2;
                         }
                     }
@@ -247,47 +242,45 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
             }
 
 
-            // Collision logic: ball vs bricks
+            // Colisión de ball contra bricks
+            //  Al detectar una colisión (con los if) se decrementa el num de hits y se modifica la velocidad
+            //  Velocidad*= : (-1 : rebota, 1 : continua (PowerBall)
             for (int i = 0; i < LINES_OF_BRICKS; i++)
             {
                 for (int j = 0; j < BRICKS_PER_LINE; j++)
                 {
                     if (brick[i][j].active)
                     {
-                        // Hit below
+                        // Golpe abajo
                         if (((ballptr->position.y - ballptr->radius) <= (brick[i][j].position.y + brickSize.y/2)) &&
                             ((ballptr->position.y - ballptr->radius) > (brick[i][j].position.y + brickSize.y/2 + ballptr->speed.y)) &&
                             ((fabs(ballptr->position.x - brick[i][j].position.x)) < (brickSize.x/2 + ballptr->radius*2/3)) && (ballptr->speed.y < 0))
                         {
                             brick[i][j].numHits --;
-                            //brick[i][j].active = false; lrg
                             ballptr->speed.y *= Num;
                         }
-                            // Hit above
+                            // Golpe Arriba
                         else if (((ballptr->position.y + ballptr->radius) >= (brick[i][j].position.y - brickSize.y/2)) &&
                                  ((ballptr->position.y + ballptr->radius) < (brick[i][j].position.y - brickSize.y/2 + ballptr->speed.y)) &&
                                  ((fabs(ballptr->position.x - brick[i][j].position.x)) < (brickSize.x/2 + ballptr->radius*2/3)) && (ballptr->speed.y > 0))
                         {
                             brick[i][j].numHits --;
-                            //brick[i][j].active = false;
                             ballptr->speed.y *= Num;
                         }
-                            // Hit left
+                            // Golpe a la izquierda
                         else if (((ballptr->position.x + ballptr->radius) >= (brick[i][j].position.x - brickSize.x/2)) &&
                                  ((ballptr->position.x + ballptr->radius) < (brick[i][j].position.x - brickSize.x/2 + ballptr->speed.x)) &&
                                  ((fabs(ballptr->position.y - brick[i][j].position.y)) < (brickSize.y/2 + ballptr->radius*2/3)) && (ballptr->speed.x > 0))
                         {
                             brick[i][j].numHits --;
-                            //brick[i][j].active = false;
                             ballptr->speed.x *= Num;
                         }
-                            // Hit right
+                            // Golpe a la derecha
                         else if (((ballptr->position.x - ballptr->radius) <= (brick[i][j].position.x + brickSize.x/2)) &&
                                  ((ballptr->position.x - ballptr->radius) > (brick[i][j].position.x + brickSize.x/2 + ballptr->speed.x)) &&
                                  ((fabs(ballptr->position.y - brick[i][j].position.y)) < (brickSize.y/2 + ballptr->radius*2/3)) && (ballptr->speed.x < 0))
                         {
                             brick[i][j].numHits --;
-                            //brick[i][j].active = false;
                             ballptr->speed.x *= Num;
                         }
                     }
@@ -297,12 +290,13 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
                 }
             }
 
-            // Game over logic
+            // Game Over
             if (player.life <= 0) gameOver = true;
             else
             {
                 gameOver = true;
 
+                // Se desactivan los bricks
                 for (int i = 0; i < LINES_OF_BRICKS; i++)
                 {
                     for (int j = 0; j < BRICKS_PER_LINE; j++)
@@ -315,9 +309,10 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
     }
     else
     {
-        if (IsKeyPressed(KEY_ENTER))
+        if (IsKeyPressed(KEY_ENTER)) // Empieza el juego
         {
-            NIVEL++;
+            NIVEL++; //Sube de NIVEL
+            // Se vuelven a inicializar variables
             Num = -1;
             BanderaMultiBall = 1;
             InitGame(NIVEL);
@@ -328,7 +323,7 @@ int UpdateGame(int* arrayPowers, int NIVEL, int numBall)
 }
 
 
-// Draw game (one frame)
+// Dibuja los frames
 void DrawGame(int *arrayPowers, int NIVEL)
 {
     BeginDrawing();
@@ -337,16 +332,16 @@ void DrawGame(int *arrayPowers, int NIVEL)
 
     if (!gameOver)
     {
-        // Draw player bar
+        // Dibuja jugador (barra negra)
         DrawRectangle(player.position.x - player.size.x/2, player.position.y - player.size.y/2, player.size.x, player.size.y, BLACK);
 
-        // Draw player lives
+        // Dibuja barras de vida (izq abajo)
         for (int i = 0; i < player.life; i++) DrawRectangle(20 + 40*i, screenHeight - 30, 35, 10, PURPLE);
 
-        // Draw ball
+        // Dibuja ball
         DrawCircleV(ball.position, ball.radius, PURPLE);
 
-        // lrg se dibujan balls para el MultiBall // se dejan de dibujar si ya estÃ¡ inactivo el poder
+        // Se dibujan balls para el MultiBall // se dejan de dibujar si ya está inactivo el poder
         if (arrayPowers[1] == 1)
         {
             DrawCircleV(ball2.position, ball2.radius, PURPLE);
@@ -354,7 +349,7 @@ void DrawGame(int *arrayPowers, int NIVEL)
         }
 
 
-        // Draw bricks
+        // Se dibujan los bricks
         for (int i = 0; i < LINES_OF_BRICKS; i++)
         {
             for (int j = 0; j < BRICKS_PER_LINE; j++)
@@ -381,21 +376,24 @@ void DrawGame(int *arrayPowers, int NIVEL)
     EndDrawing();
 }
 
-// Update and Draw (one frame)
+// Se actualiza el juego (UpdateGame)  y se dibuja (DrawGame)
 int UpdateDrawFrame(int* arrayPowers, int NIVEL)
 {
     NIVEL = UpdateGame(arrayPowers, NIVEL, 1 );
 
+    // Poder: MultiBall -
     if (IsKeyPressed('A') &&  BanderaMultiBall == 1)
-    {
+    {   // Se activa bandera para MultiBall
         BanderaMultiBall = 0;
     }
+    // Si se activa se manda llamar la funcion con las diferentes balls
     if ( BanderaMultiBall == 0 && arrayPowers[1] == 1 ) {
         UpdateGame(arrayPowers, NIVEL, 2);
         UpdateGame(arrayPowers, NIVEL, 3);
     }
 
-
+    // Se dibuja el estado del juego
     DrawGame(arrayPowers, NIVEL);
+
     return NIVEL;
 }
